@@ -21,13 +21,13 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/thann/sox-noise"
+Homepage = "https://github.com/edward-jazzhands/sox-noise"
 
 [project.scripts]
-sox-noise  = "sox_noise:start"
+sox-noise  = "sox_noise.sox_noise:start"
 
 [project.gui-scripts]
-sox-noise = "sox_noise:start"
+sox-noise = "sox_noise.sox_noise:start"
 
 # Build stuff
 
