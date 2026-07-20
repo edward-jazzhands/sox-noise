@@ -23,11 +23,8 @@ dependencies = [
 [project.urls]
 Homepage = "https://github.com/edward-jazzhands/sox-noise"
 
-[project.scripts]
-sox-noise  = "sox_noise.sox_noise:start"
-
 [project.gui-scripts]
-sox-noise = "sox_noise.sox_noise:start"
+sox-noise = "sox_noise.main:start"
 
 # Build stuff
 
