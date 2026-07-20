@@ -1,0 +1,44 @@
+[project]
+name = "sox-noise"
+dynamic = ["version"]
+description = "Noise generator GUI powered by Sound eXchange"
+readme = "README.md"
+authors = [
+    { name = "Jonathan Knapp", email = "jaknapp8@gmail.com" },
+]
+maintainers = [
+    { name = "Edward Jazzhands", email = "ed.jazzhands@gmail.com" },
+]
+license = { text = "Unlicense" }
+keywords = ["sox", "noise", "generator"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Topic :: Multimedia :: Sound/Audio :: Sound Synthesis",
+    "License :: OSI Approved :: The Unlicense (Unlicense)",
+]
+dependencies = [
+    "PyGObject",
+]
+
+[project.urls]
+Homepage = "https://github.com/thann/sox-noise"
+
+[project.scripts]
+sox-noise  = "sox_noise:start"
+
+[project.gui-scripts]
+sox-noise = "sox_noise:start"
+
+# Build stuff
+
+[build-system]
+requires = ["setuptools>=61.0", "setuptools-scm>=8.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["sox_noise"]
+
+[tool.setuptools.package-data]
+"*" = ["main.ui", ".version"]
+
+[tool.setuptools_scm]

@@ -1,1 +1,17 @@
-*
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# tooling stuff
+*_cache/
+.nox/
+
+# other
+[Tt]humbs.db

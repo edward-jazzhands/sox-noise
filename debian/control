@@ -1,0 +1,12 @@
+Source: sox-noise
+Section: sound
+Priority: optional
+Maintainer: Edward Jazzhands <ed.jazzhands@gmail.com>
+Build-Depends: debhelper-compat (= 13), dh-python, python3-all, python3-setuptools, python3-setuptools-scm
+Standards-Version: 4.6.2
+
+Package: sox-noise
+Architecture: all
+Depends: ${python3:Depends}, ${misc:Depends}, sox, python3-gi, libgtk-3-0, gir1.2-gtk-3.0
+Description: Noise generator GUI powered by Sound eXchange
+ Noise generator GUI powered by Sound eXchange (SoX).

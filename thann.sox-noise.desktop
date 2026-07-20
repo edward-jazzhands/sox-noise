@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=SoX Noise
+Comment=Noise generator GUI powered by Sound eXchange
+Exec=sox-noise --config=%f
+Icon=audio-volume-high
+Categories=AudioVideo;Audio;Player;
+MimeType=text/x-sox-noise-config;

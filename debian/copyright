@@ -1,0 +1,15 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: sox-noise
+Upstream-Contact: Jonathan Knapp <jaknapp8@gmail.com>
+Source: https://github.com/thann/sox-noise
+
+Files: *
+Copyright: Jonathan Knapp <jaknapp8@gmail.com>
+License: Unlicense
+
+Files: debian/*
+Copyright: 2026 Edward Jazzhands <ed.jazzhands@gmail.com>
+License: Unlicense
+
+License: Unlicense
+ This is free and unencumbered software released into the public domain.
