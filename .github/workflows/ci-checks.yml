@@ -1,0 +1,51 @@
+# .github/workflows/ci-checks.yml
+
+# Remember this only runs on PRs to the main branch, so you can bypass this
+# if you push to main directly from your local machine.
+
+name: CI Checks
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: '.python-version'
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+
+      - name: Setup Nox
+        uses: wntrblm/nox@2025.05.01
+
+      # installs Xvfb (virtual X server), fluxbox (lightweight window manager),
+      # and wmctrl (used in unit tests to check for the window)
+      - name: Install GUI test dependencies
+        run: sudo apt-get update && sudo apt-get install -y xvfb fluxbox wmctrl
+
+      # starts a virtual framebuffer X server on display number :99
+      # writes the DISPLAY variable into the GitHub Actions env vars
+      # then starts fluxbox (needed by wmctrl)
+      - name: Start virtual display and window manager
+        run: |
+          Xvfb :99 -screen 0 1280x1024x24 &
+          echo "DISPLAY=:99" >> "$GITHUB_ENV"
+          sleep 2
+          fluxbox -display :99 &
+          sleep 1
+
+      - name: Run Nox sessions
+        run: nox
