@@ -6,6 +6,8 @@ By Edward Jazzhands - 2025
 import nox
 import pathlib
 import shutil
+import subprocess
+import atexit
 
 #---------------#
 #  NOX CONFIG   #
@@ -41,7 +43,15 @@ if nox.options.reuse_existing_virtualenvs and DELETE_VENV_ON_EXIT:
 # PYTHON CONFIG #
 #---------------#
 
-PYTHON_VERSIONS = ["3.9", "3.10", "3.11", "3.12"]
+PYTHON_VERSIONS = ["3.10", "3.11", "3.12", "3.13", "3.14"]
+
+#-------------------#
+# ENVIRONMENT SETUP #
+#-------------------#
+
+subprocess.run(["bash", "./tests/setup.bash"], check=True)
+atexit.register(lambda: subprocess.run(["bash", "./tests/teardown.bash"]))
+
 
 #---------------#
 # NOX SESSIONS  #
@@ -63,7 +73,12 @@ def tests(session: nox.Session) -> None:
         external=True,
     )
     
-    session.run("pytest", "tests", "-vvv") 
+    # The DISPLAY env var is needed to tell programs where to find the
+    # X server virtual display created in setup_env.bash. Used by wmctrl in the test.
+    session.run(
+        "pytest", "tests", "-svvv", env={'DISPLAY': ":99"}
+    
+    )
 
     # This code here will make Nox delete each session after it finishes
     # if the `DELETE_VENV_ON_EXIT` flag is set to True.

@@ -1,14 +1,14 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: sox-noise
-Upstream-Contact: Jonathan Knapp <jaknapp8@gmail.com>
-Source: https://github.com/thann/sox-noise
+Upstream-Contact: Edward Jazzhands <ed.jazzhands@gmail.com>
+Source: https://github.com/edward-jazzhands/sox-noise
 
 Files: *
-Copyright: Jonathan Knapp <jaknapp8@gmail.com>
+Copyright: 2026 Edward Jazzhands <ed.jazzhands@gmail.com>
 License: Unlicense
 
-Files: debian/*
-Copyright: 2026 Edward Jazzhands <ed.jazzhands@gmail.com>
+Files: src/* screenshot.png mime.sxn.xml example.sxn
+Copyright: Jonathan Knapp <jaknapp8@gmail.com>
 License: Unlicense
 
 License: Unlicense
