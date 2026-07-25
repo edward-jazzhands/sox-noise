@@ -9,7 +9,7 @@
 # Together these form the standard "strict mode" to make bash scripts fail fast.
 set -euo pipefail
 
-# Step 1 of the 'release' workflow. (`just release`).
+# Step 1 of the 'release' workflow. (`make release`).
 # We must be on main and it must be up to date with origin/main for the process
 # to continue.
 # This is because it creates a new tag based on the version in pyproject.toml,

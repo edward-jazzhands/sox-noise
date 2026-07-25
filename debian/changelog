@@ -1,0 +1,10 @@
+sox-noise (1.0.0) unstable; urgency=medium
+
+  * Take over maintenance of sox-noise, originally authored by Jonathan Knapp.
+  * Migrate build system from setup.py to pyproject.toml (setuptools).
+  * Restructure project layout to use src/ directory.
+  * Add Debian packaging to build .deb releases.
+  * Fix broken version detection; freeze application version string.
+  * See CHANGELOG.md for full details.
+
+ -- Edward Jazzhands <ed.jazzhands@gmail.com>  Fri, 24 Jul 2026 00:00:00 +0000

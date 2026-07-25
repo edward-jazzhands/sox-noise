@@ -1,6 +1,6 @@
 [project]
 name = "sox-noise"
-dynamic = ["version"]
+version = "1.0.0"
 description = "Noise generator GUI powered by Sound eXchange"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -11,7 +11,7 @@ maintainers = [
     { name = "Edward Jazzhands", email = "ed.jazzhands@gmail.com" },
 ]
 license = { text = "Unlicense" }
-keywords = ["sox", "noise", "generator"]
+keywords = ["sox", "noise", "generator", "white noise"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Topic :: Multimedia :: Sound/Audio :: Sound Synthesis",
@@ -30,7 +30,7 @@ sox-noise = "sox_noise.sox_noise:start"
 # Build stuff
 
 [build-system]
-requires = ["setuptools>=61.0", "setuptools-scm>=8.0"]
+requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
@@ -38,9 +38,6 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 "*" = ["main.ui", ".version"]
-
-[tool.setuptools_scm]
-# nothing here
 
 [dependency-groups]
 dev = [
