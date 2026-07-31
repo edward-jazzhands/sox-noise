@@ -1,22 +1,3 @@
-# HOW THIS WORKFLOW WORKS
-# This workflow automates building a Debian package and creating a GitHub Release.
-
-# --- Manual Steps ---
-# 1. Edit `pyproject.toml` to set the new version (e.g., `version = "1.2.3"` or
-#    `version = "1.2.4-rc1"` for pre-releases).
-# 2. Commit the change and merge it to the `main` branch (From the feature branch or  
-#    however you work).
-# 3. On your local machine, fetch and pull the latest changes from `main` to ensure
-#    you're up to date.
-# 4. Run the release script, then push the tags to GitHub (conditonal on success):
-
-#    `bash .github/scripts/release.sh && git push --tags`
-
-# This command will:
-# - Check that you're on the `main` branch and that it's up to date with `origin/main`.
-# - Create a new tag based on the version in `pyproject.toml`.
-# - Pushes the new tag to github which, triggers this workflow file.
-
 name: Create Release and Package Debian (.deb)
 
 on:
@@ -58,12 +39,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             build-essential \
-            debhelper \
-            dh-python \
-            python3-all \
-            python3-setuptools \
-            python3-setuptools-scm \
-            tomli
+            python3-tomli
+          sudo apt build-dep .
 
       - name: Verify tag matches pyproject.toml version
         id: version_check
@@ -85,6 +62,7 @@ jobs:
           # -uc: do not sign the .changes file
           # -us: do not sign the source package
           dpkg-buildpackage -b -uc -us
+
       # This utility allows us to inject the changelog into the GitHub Release notes.
       - name: Get Changelog Entry
         id: changelog_reader
@@ -93,18 +71,18 @@ jobs:
           validation_level: warn
           version: ${{ steps.version_check.outputs.version }}
           path: ./CHANGELOG.md
+          
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ github.event.inputs.tag_name || github.ref_name }}"
+          PRERELEASE_FLAG=""
+          if [[ "$TAG" == *-* ]]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
 
-      - name: Create GitHub Release and Upload Assets
-        uses: ncipollo/release-action@v1
-        with:
-          tag: ${{ github.event.inputs.tag_name || github.ref_name }}
-          # The release title will be something like "Release v1.2.3"
-          name: Release ${{ github.event.inputs.tag_name || github.ref_name }}
-          # The release 'body' is the changelog entry from the previous step
-          body: ${{ steps.changelog_reader.outputs.changes }}
-          # Automatically mark as pre-release if the tag contains a hyphen (e.g., v1.2.3-rc1):
-          prerelease: ${{ contains(github.event.inputs.tag_name || github.ref_name, '-') }}
-          # Allows the action to update a release if it already exists:
-          allowUpdates: true
-          # dpkg-buildpackage places output files in the parent directory (..)
-          artifacts: "../*.deb"
+          gh release create "$TAG" ../*.deb \
+            --title "Release $TAG" \
+            --notes "${{ steps.changelog_reader.outputs.changes }}" \
+            $PRERELEASE_FLAG

@@ -23,35 +23,37 @@ help:
 # -uc skips signing the .buildinfo and .changes files
 # -b specifies building a binary-only package without rebuilding the source archive.
 build-deb:
+	sudo apt build-dep .
+
 	dpkg-buildpackage -us -uc -b
 
 # Install using system libraries, ensures they are installed
 install:
-    sudo apt install sox python3-gi gir1.2-gtk-3.0 libgtk-3-0
+	sudo apt install sox python3-gi gir1.2-gtk-3.0 libgtk-3-0
 
-    @echo "Installer set to $(WITH)..."
-    @echo "HINT: Use 'make install WITH=uv' to use the UV package manager."
+	@echo "Installer set to $(WITH)..."
+	@echo "HINT: Use 'make install WITH=uv' to use the UV package manager."
 
-    # First check if .venv folder exists already:
-    if [ -d ".venv" ]; then
-        echo "Virtual environment already exists. Skipping creation."
-        echo "To recreate the virtual environment, delete the .venv folder."
-    else
-        if [ "$(WITH)" = "default" ]; then
-            python3 -m venv .venv --system-site-packages
-        else
-            uv venv --system-site-packages
-        fi
-    fi
-    
-    if [ "$(WITH)" = "default" ]; then
-        .venv/bin/pip install .
-    else
-        uv sync
-    fi
+	# First check if .venv folder exists already:
+	if [ -d ".venv" ]; then
+		echo "Virtual environment already exists. Skipping creation."
+		echo "To recreate the virtual environment, delete the .venv folder."
+	else
+		if [ "$(WITH)" = "uv" ]; then
+			uv venv --system-site-packages
+		else
+			python3 -m venv .venv --system-site-packages
+		fi
+	fi
+		
+	if [ "$(WITH)" = "uv" ]; then
+		uv sync
+	else
+		.venv/bin/pip install .
+	fi
 
-    mkdir -p ~/.local/share/applications
-    cp thann.sox-noise.desktop ~/.local/share/applications/thann.sox-noise.desktop
+	mkdir -p ~/.local/share/applications
+	cp thann.sox-noise.desktop ~/.local/share/applications/thann.sox-noise.desktop
 
 compile:
 	sudo apt install sox python3-dev libgirepository-2.0-dev libgtk-3-dev gcc libcairo2-dev
@@ -63,17 +65,17 @@ compile:
 		echo "Virtual environment already exists. Skipping creation."
 		echo "To recreate the virtual environment, delete the .venv folder."
 	else
-		if [ "$(WITH)" = "default" ]; then
-			python3 -m venv .venv
-		else
+		if [ "$(WITH)" = "uv" ]; then
 			uv venv
+		else
+			python3 -m venv .venv
 		fi
 	fi
 	
-	if [ "$(WITH)" = "default" ]; then
-		.venv/bin/pip install .
-	else
+	if [ "$(WITH)" = "uv" ]; then
 		uv sync
+	else
+		.venv/bin/pip install .
 	fi
 
 	mkdir -p ~/.local/share/applications
@@ -95,6 +97,7 @@ sync-tags:
 	git fetch --prune origin "+refs/tags/*:refs/tags/*"
 
 # Run the .github/scripts files and push the tags
+# see release.sh for more information
 release: sync-tags
 	bash .github/scripts/release.sh && git push --tags
 	

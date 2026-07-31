@@ -1,12 +1,28 @@
 #!/usr/bin/env bash
 
-# The -e flag makes bash exit immediately if any command fails, rather than continuing to 
-# execute the rest of the script.
-# The -u flag treats unset variables as errors instead of silently expanding them to empty 
-# strings, which catches a lot of subtle bugs. 
-# The -o pipefail flag makes a pipeline (like cmd1 | cmd2) fail if any command in it fails, 
-# not just the last one — by default bash only checks the exit code of the last command in a pipe.
-# Together these form the standard "strict mode" to make bash scripts fail fast.
+# HOW THIS WORKFLOW WORKS
+# This workflow automates building a Debian package and creating a GitHub Release.
+
+# --- Manual Steps ---
+# 1. Edit `pyproject.toml` to set the new version (e.g., `version = "1.2.3"` or
+#    `version = "1.2.4-rc1"` for pre-releases).
+# 2. Commit the change and merge it to the `main` branch (From the feature branch or  
+#    however you work).
+# 3. On your local machine, fetch and pull the latest changes from `main` to ensure
+#    you're up to date.
+# 4. Run the release script, then push the tags to GitHub (conditonal on success):
+
+#    `bash .github/scripts/release.sh && git push --tags`
+
+# This command will:
+# - Check that you're on the `main` branch and that it's up to date with `origin/main`.
+# - Create a new tag based on the version in `pyproject.toml`.
+# - Pushes the new tag to github which, triggers this workflow file.
+
+
+# The -e flag makes bash exit immediately if any command fails
+# The -u flag treats unset variables as errors instead of creating empty strings
+# The -o pipefail flag makes a pipeline (like cmd1 | cmd2) fail if any command in it fails
 set -euo pipefail
 
 # Step 1 of the 'release' workflow. (`make release`).
@@ -15,16 +31,13 @@ set -euo pipefail
 # This is because it creates a new tag based on the version in pyproject.toml,
 # and then pushes the tag to GitHub. Tags are metadata that go over the top of
 # branches and commits, so they're not blocked by branch protection rules.
-# That's why it's important to make sure you're on main and it's up to date.
 
 # If we're not on main or it's not up to date with origin/main, problems could
 # occur, such as:
 # - The 'version' in pyproject.toml doesn't match what's in the online main
 #   branch on Github
 # - You push a tag that points to a commit that Github hasn't seen yet,
-
-# It's best to ensure you can't do any of these things by mistake, because it's
-# a pain in the ass to fix them if you do.
+# it's a pain in the ass to fix if you do any of these things by mistake.
 
 # Check if on main branch
 CURRENT_BRANCH=$(git branch --show-current)
