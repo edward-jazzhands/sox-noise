@@ -78,6 +78,15 @@ tag="v${version}"
 
 echo "Found version ${version}. Creating tag: ${tag}"
 
+read -r -p "Are you sure you want to continue? [y/N] " response
+
+if [[ "$response" =~ ^[Yy]$ ]]; then
+    echo "Continuing..."
+else
+    echo "Aborting."
+    exit 1
+fi
+
 if git tag "$tag"; then
     echo "Successfully created tag '${tag}'."
 else
