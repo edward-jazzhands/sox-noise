@@ -37,7 +37,10 @@ jobs:
       # installs Xvfb (virtual X server), fluxbox (lightweight window manager),
       # and wmctrl (used in unit tests to check for the window)
       - name: Install GUI test dependencies
-        run: sudo apt-get update && sudo apt-get install -y xvfb fluxbox wmctrl
+        run: |
+          sudo apt-get update && \
+          sudo apt-get install -y xvfb fluxbox wmctrl \
+          sox python3-gi gir1.2-gtk-3.0 libgtk-3-0
 
       - name: Run Nox sessions
         run: nox
