@@ -15,7 +15,14 @@ done
 
 if [[ "$missing" -eq 1 ]]; then
     echo "Missing at least one dependency. Running apt install..."
-    sudo apt install xvfb fluxbox wmctrl
+
+	if [[ "$USER" == "root" ]]; then
+		echo "User is root, don't need sudo..."
+		apt install xvfb fluxbox wmctrl
+	else
+		sudo apt install xvfb fluxbox wmctrl
+	fi
+
 else
     echo "All testing dependencies found."
 fi

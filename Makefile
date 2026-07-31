@@ -1,8 +1,10 @@
 .ONESHELL:
 SHELL := /bin/bash
+.SILENT:
 .PHONY: help build-deb install compile test nox sync-tags release
 
 WITH ?= default
+ENV ?= default
 
 ## Show this help message
 help:
@@ -13,23 +15,19 @@ help:
 	@echo ""
 	@echo "Development commands:"
 	@echo "  build-deb       - Build using dpkg-buildpackage for Debian"
-	@echo "  test            - Set up the environment for headless testing and run pytest"
-	@echo "  nox             - Run the nox testing suite"
+	@echo "  test            - Set up the environment for headless testing and run pytest ('make test WITH=uv' to use UV)"
+	@echo "  nox             - Run the nox testing suite (UV is REQUIRED to run this)"
 	@echo "  sync-tags       - Syncs the tags from origin to local"
 	@echo "  release         - Pushes the tags to origin"
 
-# build using dpkg-buildpackage for Debian
-# The -us flag skips signing the source package
-# -uc skips signing the .buildinfo and .changes files
-# -b specifies building a binary-only package without rebuilding the source archive.
-build-deb:
-	sudo apt build-dep .
-
-	dpkg-buildpackage -us -uc -b
-
 # Install using system libraries, ensures they are installed
 install:
-	sudo apt install sox python3-gi gir1.2-gtk-3.0 libgtk-3-0
+	if [[ "$$USER" == "root" ]]; then
+		echo "User is root, don't need sudo..."
+		apt install sox python3-gi gir1.2-gtk-3.0 libgtk-3-0
+	else
+		sudo apt install sox python3-gi gir1.2-gtk-3.0 libgtk-3-0
+	fi
 
 	@echo "Installer set to $(WITH)..."
 	@echo "HINT: Use 'make install WITH=uv' to use the UV package manager."
@@ -42,21 +40,39 @@ install:
 		if [ "$(WITH)" = "uv" ]; then
 			uv venv --system-site-packages
 		else
+			if [[ "$$USER" == "root" ]]; then
+				apt install python3-venv
+			else
+				sudo apt install python3-venv
+			fi
 			python3 -m venv .venv --system-site-packages
 		fi
 	fi
 		
 	if [ "$(WITH)" = "uv" ]; then
-		uv sync
+		if [ "$(ENV)" = "dev" ]; then
+			uv sync --all-extras
+		else
+			uv sync
+		fi
 	else
-		.venv/bin/pip install .
+		if [ "$(ENV)" = "dev" ]; then
+			.venv/bin/pip install -e . --group dev
+		else
+			.venv/bin/pip install .
+		fi
 	fi
 
 	mkdir -p ~/.local/share/applications
 	cp thann.sox-noise.desktop ~/.local/share/applications/thann.sox-noise.desktop
 
 compile:
-	sudo apt install sox python3-dev libgirepository-2.0-dev libgtk-3-dev gcc libcairo2-dev
+	if [[ "$$USER" == "root" ]]; then
+		echo "User is root, don't need sudo..."
+		apt install sox python3-dev libgirepository-2.0-dev libgtk-3-dev gcc libcairo2-dev
+	else
+		sudo apt install sox python3-dev libgirepository-2.0-dev libgtk-3-dev gcc libcairo2-dev
+	fi
 
 	@echo "Installer set to $(WITH)..."
 	@echo "HINT: Use 'make compile WITH=uv' to use the UV package manager."
@@ -68,14 +84,27 @@ compile:
 		if [ "$(WITH)" = "uv" ]; then
 			uv venv
 		else
+			if [[ "$$USER" == "root" ]]; then
+				apt install python3-venv
+			else
+				sudo apt install python3-venv
+			fi
 			python3 -m venv .venv
 		fi
 	fi
 	
 	if [ "$(WITH)" = "uv" ]; then
-		uv sync
+		if [ "$(ENV)" = "dev" ]; then
+			uv sync --all-extras
+		else
+			uv sync
+		fi
 	else
-		.venv/bin/pip install .
+		if [ "$(ENV)" = "dev" ]; then
+			.venv/bin/pip install -e . --group dev
+		else
+			.venv/bin/pip install .
+		fi
 	fi
 
 	mkdir -p ~/.local/share/applications
@@ -84,13 +113,26 @@ compile:
 # Sets up the environment and runs pytest
 test:
 	source ./tests/setup.bash
-	uv run pytest tests -svvv
+	if [ "$(WITH)" = "uv" ]; then
+		uv run pytest tests -svvv
+	else
+		.venv/bin/pytest tests -svvv
+	fi
 	source ./tests/teardown.bash
 
 # Run the nox testing suite
 # the noxfile will run the setup and teardown scripts
 nox:
 	nox
+
+# build using dpkg-buildpackage for Debian
+# The -us flag skips signing the source package
+# -uc skips signing the .buildinfo and .changes files
+# -b specifies building a binary-only package without rebuilding the source archive.
+build-deb:
+	sudo apt build-dep .
+
+	dpkg-buildpackage -us -uc -b
 
 # Syncs the tags from origin to local
 sync-tags:
@@ -110,3 +152,15 @@ release: sync-tags
 # is not blocked by Github's branch protection rules even if its configured to block 
 # pushes to the main branch.
 
+container:
+	if ! command -v systemd-nspawn &>/dev/null; then
+		sudo apt install systemd-container
+	fi
+	if ! command -v debootstrap &>/dev/null; then
+		sudo apt install debootstrap
+	fi
+	if ! test -d /var/lib/machines/testcontainer/var/lib/dpkg; then
+		sudo debootstrap stable /var/lib/machines/testcontainer http://deb.debian.org/debian
+		sudo systemd-nspawn -D /var/lib/machines/testcontainer /bin/bash -c "passwd"
+	fi
+	sudo systemd-nspawn -bD /var/lib/machines/testcontainer --bind=$(CURDIR):/app

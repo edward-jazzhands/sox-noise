@@ -60,6 +60,7 @@ atexit.register(lambda: subprocess.run(["bash", "./tests/teardown.bash"]))
 @nox.session(
     venv_backend="uv",
     python=PYTHON_VERSIONS,
+    venv_params=["--system-site-packages"],
 )
 def tests(session: nox.Session) -> None:
 
