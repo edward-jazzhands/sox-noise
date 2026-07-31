@@ -37,16 +37,14 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            build-essential \
-            python3-tomli
+          sudo apt-get install -y build-essential
           sudo apt build-dep .
 
       - name: Verify tag matches pyproject.toml version
         id: version_check
         run: |
           TAG_NAME="${{ github.event.inputs.tag_name || github.ref_name }}"
-          PYPROJECT_VERSION=$(python3 -c "import tomli; print(tomli.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          PYPROJECT_VERSION=$(python3 -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
 
           if [ "v$PYPROJECT_VERSION" != "$TAG_NAME" ]; then
             echo "Error: Tag '$TAG_NAME' does not match pyproject.toml version 'v$PYPROJECT_VERSION'"
