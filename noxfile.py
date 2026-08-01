@@ -60,15 +60,20 @@ atexit.register(lambda: subprocess.run(["bash", "./tests/teardown.bash"]))
 @nox.session(
     venv_backend="uv",
     python=PYTHON_VERSIONS,
-    venv_params=["--system-site-packages"],
 )
 def tests(session: nox.Session) -> None:
 
+    # Note we have to compile in matrix CI testing instead of using the gi module.
+    # This is because system python libs will only exist for 1 version of python,
+    # meaning the test would only pass for that one (ie. 3.12) but not the others.
+    # Compiling PyGObject avoids this problem.
     session.run_install(
         "uv",
         "sync",
         "--quiet",
         "--reinstall",
+        "--extra",
+        "compile",
         f"--python={session.virtualenv.location}",
         env={"UV_PROJECT_ENVIRONMENT": session.virtualenv.location},
         external=True,

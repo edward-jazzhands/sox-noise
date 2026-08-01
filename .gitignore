@@ -12,6 +12,7 @@ wheels/
 # tooling stuff
 *_cache/
 .nox/
+.apt-updated
 
 # other
 [Tt]humbs.db

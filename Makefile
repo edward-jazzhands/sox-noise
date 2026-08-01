@@ -1,12 +1,12 @@
 .ONESHELL:
 SHELL := /bin/bash
 .SILENT:
-.PHONY: help build-deb install compile test nox sync-tags release
+.PHONY: help install compile desktop-file test nox build-deb sync-tags release container
+SUDO := $(shell [[ "$$USER" == "root" ]] && echo "" || echo "sudo")
 
 WITH ?= default
 ENV ?= default
 
-## Show this help message
 help:
 	@echo "User commands:"
 	@echo "  help            - Show this help message"
@@ -20,17 +20,22 @@ help:
 	@echo "  sync-tags       - Syncs the tags from origin to local"
 	@echo "  release         - Pushes the tags to origin"
 
-# Install using system libraries, ensures they are installed
-install:
-	if [[ "$$USER" == "root" ]]; then
-		echo "User is root, don't need sudo..."
-		apt install sox python3-gi gir1.2-gtk-3.0 libgtk-3-0
-	else
-		sudo apt install sox python3-gi gir1.2-gtk-3.0 libgtk-3-0
-	fi
+# this is an actual file, so no PHONY
+.apt-updated:
+	$(SUDO) apt update
+	touch .apt-updated
 
+PACKAGES := sox python3-gi gir1.2-gtk-3.0 libgtk-3-0
+
+install: .apt-updated
+	$(SUDO) apt install $(PACKAGES)
+
+	@echo ""
 	@echo "Installer set to $(WITH)..."
-	@echo "HINT: Use 'make install WITH=uv' to use the UV package manager."
+	if [ "$(WITH)" = "default" ]; then
+		@echo "HINT: Use 'make install WITH=uv' to use the UV package manager."
+	fi
+	@echo ""
 
 	# First check if .venv folder exists already:
 	if [ -d ".venv" ]; then
@@ -40,42 +45,38 @@ install:
 		if [ "$(WITH)" = "uv" ]; then
 			uv venv --system-site-packages
 		else
-			if [[ "$$USER" == "root" ]]; then
-				apt install python3-venv
-			else
-				sudo apt install python3-venv
-			fi
+			$(SUDO) apt install python3-venv
 			python3 -m venv .venv --system-site-packages
 		fi
 	fi
 		
 	if [ "$(WITH)" = "uv" ]; then
 		if [ "$(ENV)" = "dev" ]; then
-			uv sync --all-extras
-		else
 			uv sync
+		else
+			uv sync --no-dev
 		fi
 	else
 		if [ "$(ENV)" = "dev" ]; then
-			.venv/bin/pip install -e . --group dev
+			.venv/bin/pip install -e ".[pytest]"
 		else
 			.venv/bin/pip install .
 		fi
 	fi
 
-	mkdir -p ~/.local/share/applications
-	cp thann.sox-noise.desktop ~/.local/share/applications/thann.sox-noise.desktop
+	$(MAKE) desktop-file
 
-compile:
-	if [[ "$$USER" == "root" ]]; then
-		echo "User is root, don't need sudo..."
-		apt install sox python3-dev libgirepository-2.0-dev libgtk-3-dev gcc libcairo2-dev
-	else
-		sudo apt install sox python3-dev libgirepository-2.0-dev libgtk-3-dev gcc libcairo2-dev
-	fi
+COMPILING_PKGS := sox python3-dev libgirepository-2.0-dev libgtk-3-dev gcc libcairo2-dev
 
+compile: .apt-updated
+	$(SUDO) apt install $(COMPILING_PKGS)
+
+	@echo ""
 	@echo "Installer set to $(WITH)..."
-	@echo "HINT: Use 'make compile WITH=uv' to use the UV package manager."
+	if [ "$(WITH)" = "default" ]; then
+		@echo "HINT: Use 'make compile WITH=uv' to use the UV package manager."
+	fi
+	@echo ""
 
 	if [ -d ".venv" ]; then
 		echo "Virtual environment already exists. Skipping creation."
@@ -84,41 +85,43 @@ compile:
 		if [ "$(WITH)" = "uv" ]; then
 			uv venv
 		else
-			if [[ "$$USER" == "root" ]]; then
-				apt install python3-venv
-			else
-				sudo apt install python3-venv
-			fi
+			$(SUDO) apt install python3-venv
 			python3 -m venv .venv
 		fi
 	fi
 	
 	if [ "$(WITH)" = "uv" ]; then
 		if [ "$(ENV)" = "dev" ]; then
-			uv sync --all-extras
+			uv sync --extra compile
 		else
-			uv sync
+			uv sync --no-dev --extra compile
 		fi
 	else
 		if [ "$(ENV)" = "dev" ]; then
-			.venv/bin/pip install -e . --group dev
+			.venv/bin/pip install -e ".[compile,pytest]"
 		else
-			.venv/bin/pip install .
+			.venv/bin/pip install ".[compile]"
 		fi
 	fi
 
+	$(MAKE) desktop-file
+
+desktop-file:
 	mkdir -p ~/.local/share/applications
 	cp thann.sox-noise.desktop ~/.local/share/applications/thann.sox-noise.desktop
 
 # Sets up the environment and runs pytest
+# the status arg 
 test:
 	source ./tests/setup.bash
 	if [ "$(WITH)" = "uv" ]; then
-		uv run pytest tests -svvv
+		uv run pytest tests -svvv; status=$$?
 	else
-		.venv/bin/pytest tests -svvv
+		.venv/bin/pytest tests -svvv; status=$$?
 	fi
 	source ./tests/teardown.bash
+	exit $$status
+
 
 # Run the nox testing suite
 # the noxfile will run the setup and teardown scripts
@@ -129,38 +132,40 @@ nox:
 # The -us flag skips signing the source package
 # -uc skips signing the .buildinfo and .changes files
 # -b specifies building a binary-only package without rebuilding the source archive.
-build-deb:
-	sudo apt build-dep .
-
+build-deb: .apt-updated
+	$(SUDO) apt build-dep .
 	dpkg-buildpackage -us -uc -b
+
+clean:
+	rm -rf src/sox_noise.egg-info
+	rm -rf build
+	rm -rf __pycache__
+	rm -rf .pytest_cache
+	rm -rf .nox
+
 
 # Syncs the tags from origin to local
 sync-tags:
 	git fetch --prune origin "+refs/tags/*:refs/tags/*"
 
-# Run the .github/scripts files and push the tags
+# Run the release script and push the tags on success.
+# Only release with this command, it contains a bunch of safety checks.
 # see release.sh for more information
 release: sync-tags
 	bash .github/scripts/release.sh && git push --tags
-	
-# git push --tags does not push commits to your main branch (or any other branch). It only 
-# uploads the "tag objects"—which are essentially just small pointers that say, "This 
-# specific commit hash has the name v1.0."
-
-# Because a tag is just metadata sitting "on top" of a commit that usually already exists 
-# on the server, pushing a tag doesn't change the branch itself. And so the push request
-# is not blocked by Github's branch protection rules even if its configured to block 
-# pushes to the main branch.
 
 container:
 	if ! command -v systemd-nspawn &>/dev/null; then
-		sudo apt install systemd-container
+		$(SUDO) apt install systemd-container
 	fi
 	if ! command -v debootstrap &>/dev/null; then
-		sudo apt install debootstrap
+		$(SUDO) apt install debootstrap
 	fi
+
+	# only create new container if it doesn't exist already:
 	if ! test -d /var/lib/machines/testcontainer/var/lib/dpkg; then
-		sudo debootstrap stable /var/lib/machines/testcontainer http://deb.debian.org/debian
-		sudo systemd-nspawn -D /var/lib/machines/testcontainer /bin/bash -c "passwd"
+		$(SUDO) debootstrap stable /var/lib/machines/testcontainer http://deb.debian.org/debian
+		# immediately create an admin password for logging in:
+		$(SUDO) systemd-nspawn -D /var/lib/machines/testcontainer /bin/bash -c "passwd"
 	fi
-	sudo systemd-nspawn -bD /var/lib/machines/testcontainer --bind=$(CURDIR):/app
+	$(SUDO) systemd-nspawn -bD /var/lib/machines/testcontainer --bind=$(CURDIR):/app

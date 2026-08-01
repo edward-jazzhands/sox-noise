@@ -17,9 +17,6 @@ classifiers = [
     "Topic :: Multimedia :: Sound/Audio :: Sound Synthesis",
     "License :: OSI Approved :: The Unlicense (Unlicense)",
 ]
-dependencies = [
-    "PyGObject",
-]
 
 [project.urls]
 Homepage = "https://github.com/edward-jazzhands/sox-noise"
@@ -39,7 +36,10 @@ where = ["src"]
 [tool.setuptools.package-data]
 "*" = ["main.ui", ".version"]
 
+[project.optional-dependencies]
+compile = ["PyGObject>=3.42"]
+
 [dependency-groups]
 dev = [
-    "pytest<8.0.0",
+    "pytest>=8.4.1",
 ]
