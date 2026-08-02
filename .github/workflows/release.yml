@@ -34,12 +34,6 @@ jobs:
         with:
           python-version-file: '.python-version'
 
-      - name: Install build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential
-          sudo apt build-dep .
-
       - name: Verify tag matches pyproject.toml version
         id: version_check
         run: |
@@ -54,8 +48,17 @@ jobs:
           echo "Tag and pyproject.toml version match: $TAG_NAME"
           echo "version=${TAG_NAME#v}" >> $GITHUB_OUTPUT
 
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential
+          sudo apt build-dep .
+
       - name: Build Debian Package
         run: |
+          # this ensures it uses the normal system python
+          export PATH="/usr/bin:$PATH"
+
           # -b: build binary packages only (produces .deb)
           # -uc: do not sign the .changes file
           # -us: do not sign the source package
