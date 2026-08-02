@@ -7,12 +7,20 @@ wheels/
 *.egg-info
 
 # Virtual environments
-.venv
+.venv/
 
 # tooling stuff
 *_cache/
 .nox/
 .apt-updated
+
+# build artifacts
+*.debhelper
+*.substvars
+sox-noise/
+debhelper-build-stamp
+files
+.pybuild/
 
 # other
 [Tt]humbs.db
