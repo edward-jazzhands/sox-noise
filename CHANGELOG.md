@@ -1,5 +1,10 @@
 # Changelog for SoX Noise
 
+## [1.0.1] 2026-08-06
+
+- Added man page
+- Improved package meta data to get ready for submission to Debian
+
 ## [1.0.0] 2026-07-24
 
 Restructured fork with modern Python practices and a CI build pipeline.
