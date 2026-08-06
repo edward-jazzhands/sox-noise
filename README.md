@@ -1,7 +1,7 @@
 # SoX Noise
 
 [![badge](https://img.shields.io/github/v/release/edward-jazzhands/sox-noise)](https://github.com/edward-jazzhands/sox-noise/releases/latest)
-[![badge](https://img.shields.io/badge/Requires_Python->=3.9-blue&logo=python)](https://python.org)
+[![badge](https://img.shields.io/badge/Requires_Python->=3.10-blue&logo=python)](https://python.org)
 [![badge](https://img.shields.io/badge/license-Unlicense-blue)](https://opensource.org/license/unlicense)
 
 ## Note from Ed
@@ -12,7 +12,7 @@ The original application code is unchanged. Issues specific to the original appl
 
 I noticed SoX-Noise wasn't installable on modern Linux distributions without workarounds, as the original author only set up installing with the system pip (All modern Linux distros do not allow installing packages using the system pip). So I created a fork that modernizes the packaging (PEP 517/518, `pyproject.toml`, etc.) and set up a CI pipeline to test against numerous versions of python, and build and publish a .deb file (.rpm coming soon).
 
-This program has been tested running on Python 3.9 through 3.14.
+This program has been tested running on Python 3.10 through 3.14.
 
 **Warning: Only Debian-based distros are officially supported at the moment. If you want to install this on other distros then you'll need to install from source and modify the `sudo apt install` lines to match your distro's package manager. The package names may also be different.**
 

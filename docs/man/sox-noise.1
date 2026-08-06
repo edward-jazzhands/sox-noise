@@ -1,0 +1,122 @@
+.TH SOX-NOISE 1 "2026-08-04" "1.0" "Sox Noise Manual"
+.SH NAME
+sox-noise \- graphical and command-line utility for generating white/pink/brown noise
+.SH SYNOPSIS
+.B sox-noise
+.RI [ OPTIONS ]
+.RI [ COLOR ]
+.SH DESCRIPTION
+.B sox-noise
+is a noise generator GUI powered by Sound eXchange (SoX).
+.PP
+Launching the executable with no arguments opens the main application window.
+The program also has a command-line interface: it can be used to launch the
+GUI pre-configured with the options given, to run headless (see
+.B \-\-hide
+below), or to render noise directly to a file or audio device without ever
+opening a window. When run from a terminal, it also prints SoX's own
+live encoding/progress output for debugging purposes.
+.SH OPTIONS
+.TP
+.RI [ COLOR ]
+The "color" of noise to generate. One of:
+.BR brown ", " pink ", " white ", " tpdf .
+.TP
+.B \-h\fR,\fB \-\-help
+Show the help message and exit.
+.TP
+.BI \-\-config \ CONFIG
+Configuration file location (default: \fI~/.config/sox-noise/default.sxn\fR).
+.TP
+.B \-\-play
+Start playing on open.
+.TP
+.BI \-\-volume \ VOLUME
+Playback volume [1-120].
+.TP
+.BI \-\-band\-center \ BAND_CENTER
+Band-pass filter center frequency [1-2000] (Hz).
+.TP
+.BI \-\-band\-width \ BAND_WIDTH
+Band-pass filter width [1-1000].
+.TP
+.B \-\-effects
+Show effects options.
+.TP
+.BI \-\-reverb \ REVERB
+Reverb amount [0-100]. Small amounts make the noise sound more natural.
+.TP
+.BI \-\-tremolo\-speed \ TREMOLO_SPEED
+Periodically raise and lower the volume [0-10] (cycles per duration).
+.TP
+.BI \-\-tremolo\-depth \ TREMOLO_DEPTH
+Tremolo intensity [0-100].
+.TP
+.BI \-\-lowpass \ LOWPASS
+Lowpass filter width. Disable with 0.
+.TP
+.BI \-\-duration \ DURATION
+How many seconds of noise to generate before looping (default: 60).
+.TP
+.BI \-\-fade \ FADE
+How long to fade in/out on loop, in seconds. Prevents clicking/popping
+(default: 0.005).
+.TP
+.B \-\-tray
+Show an icon in the system tray.
+.TP
+.B \-\-hide
+Don't show the window.
+.TP
+.BI \-\-save \ SAVE
+Save sound to the given filename instead of (or in addition to) playing it.
+.TP
+.BI \-\-output \ {pulse,alsa,wav,sox,default}
+Output device/format.
+.TP
+.B \-\-spectrogram
+Show the spectrogram.
+.TP
+.BI \-\-extras \ EXTRAS \ [ EXTRAS \ ...]
+Extra arguments to pass through to \fBsox\fR(1) directly.
+.TP
+.B \-\-version
+Show the application and package version and exit.
+.SH EXAMPLES
+.TP
+.B sox-noise \-\-play
+Launch the GUI and immediately start playing the default noise. This
+also prints the underlying
+.B sox
+invocation and its live progress meter to the terminal, e.g.:
+.PP
+.RS
+.EX
+\&\ ===> sox \-c2 \-\-null \-d synth 0:60 brownnoise band \-n 500.0 500.0 \e
+    tremolo 0.03333333333333333 30.0 reverb 20.0 vol 0.8 fade q 0.005 0:60 0.005 repeat \-
+.EE
+.RE
+.SH FILES
+.TP
+.I ~/.config/sox-noise/default.sxn
+Default configuration file, loaded unless overridden with \fB\-\-config\fR.
+.SH SEE ALSO
+.BR sox (1)
+.SH AUTHOR
+Written by Jon Knapp.
+.PP
+Debian packaging and current maintenance by Brent Lidstone (a.k.a Edward Jazzhands)
+.SH HISTORY
+.B sox-noise
+was originally written by Jon Knapp in 2020 and was last updated in 2024.
+This version is maintained by Brent Lidstone, who created the Debian packaging
+and build infrastructure in 2026.
+.SH REPORTING BUGS
+Any issues with installation, packaging or .deb files should be reported at
+.UR https://github.com/edward-jazzhands/sox-noise/issues
+.UE
+.PP
+Bugs in the underlying program itself should be reported to the original
+project at
+.UR https://github.com/Thann/sox-noise/issues
+.UE

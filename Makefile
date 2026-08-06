@@ -1,7 +1,7 @@
 .ONESHELL:
 SHELL := /bin/bash
 .SILENT:
-.PHONY: help install compile desktop-file test nox build-deb sync-tags release container
+.PHONY: help install compile desktop-file test nox build-deb sync-tags release container lintian appstream
 SUDO := $(shell [[ "$$USER" == "root" ]] && echo "" || echo "sudo")
 
 WITH ?= default
@@ -18,6 +18,9 @@ help:
 	@echo "  test            - Set up the environment for headless testing and run pytest ('make test WITH=uv' to use UV)"
 	@echo "  nox             - Run the nox testing suite (UV is REQUIRED to run this)"
 	@echo "  sync-tags       - Syncs the tags from origin to local"
+	@echo "  lintian         - Runs lintian on the built .changes file"
+	@echo "  container       - "
+	@echo "  appstream    "
 	@echo "  release         - Pushes the tags to origin"
 
 # this is an actual file, so no PHONY
@@ -108,7 +111,7 @@ compile: .apt-updated
 
 desktop-file:
 	mkdir -p ~/.local/share/applications
-	cp thann.sox-noise.desktop ~/.local/share/applications/thann.sox-noise.desktop
+	cp io.github.edward_jazzhands.SoxNoise.desktop ~/.local/share/applications/io.github.edward_jazzhands.SoxNoise.desktop
 
 # Sets up the environment and runs pytest
 # the status arg 
@@ -169,3 +172,18 @@ container:
 		$(SUDO) systemd-nspawn -D /var/lib/machines/testcontainer /bin/bash -c "passwd"
 	fi
 	$(SUDO) systemd-nspawn -bD /var/lib/machines/testcontainer --bind=$(CURDIR):/app
+
+lintian:
+	if ! command -v lintian &>/dev/null; then
+		$(SUDO) apt install lintian
+	fi
+	pkg_name=$$(dpkg-parsechangelog -SSource)
+	pkg_version=$$(dpkg-parsechangelog -SVersion | sed 's/^[0-9]*://')
+	arch=$$(dpkg --print-architecture)
+	lintian -i -I --pedantic --profile debian "../$${pkg_name}_$${pkg_version}_$${arch}.changes"
+
+appstream:
+	if ! command -v appstream &>/dev/null; then
+		$(SUDO) apt install appstream
+	fi
+	appstream-util validate-relax debian/io.github.edward_jazzhands.SoxNoise.metainfo.xml

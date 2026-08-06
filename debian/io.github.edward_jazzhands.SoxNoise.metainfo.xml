@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.edward_jazzhands.SoxNoise</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>Unlicense</project_license>
+
+  <developer id="io.github.thann">
+    <name>Jon Knapp</name>
+  </developer>
+
+  <name>sox-noise</name>
+  <summary>Noise generator GUI powered by Sound eXchange (SoX)</summary>
+
+  <description>
+    <p>
+      SoX Noise is a GTK application that uses SoX to generate white, pink,
+      or brown noise in real time, as well as provide some filter controls
+      and basic effects.
+    </p>
+    <p>
+      It provides a simple interface for choosing the noise type and adjusting
+      the controls, and it is extremely light on CPU.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">io.github.edward_jazzhands.SoxNoise.desktop</launchable>
+
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/edward-jazzhands/sox-noise/refs/heads/main/screenshot.png</image>
+      <caption>Main window with noise selector and filter controls</caption>
+    </screenshot>
+  </screenshots>
+
+  <url type="homepage">https://github.com/edward-jazzhands/sox-noise</url>
+  <url type="bugtracker">https://github.com/edward-jazzhands/sox-noise/issues</url>
+
+  <provides>
+    <binary>sox-noise</binary>
+  </provides>
+
+  <releases>
+    <release version="1.0" date="2026-08-02"/>
+  </releases>
+
+  <content_rating type="oars-1.1"/>
+
+</component>

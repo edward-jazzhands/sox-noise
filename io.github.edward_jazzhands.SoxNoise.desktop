@@ -6,3 +6,4 @@ Exec=sox-noise --config=%f
 Icon=audio-volume-high
 Categories=AudioVideo;Audio;Player;
 MimeType=text/x-sox-noise-config;
+Keywords=noise;white noise;

@@ -1,9 +1,9 @@
 [project]
 name = "sox-noise"
-version = "1.0.0"
+version = "1.0.1"
 description = "Noise generator GUI powered by Sound eXchange"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 authors = [
     { name = "Jonathan Knapp", email = "jaknapp8@gmail.com" },
 ]
