@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>io.github.edward_jazzhands.SoxNoise</id>
+  <id>sox-noise</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>Unlicense</project_license>
 
@@ -13,7 +13,7 @@
 
   <description>
     <p>
-      SoX Noise is a GTK application that uses SoX to generate white, pink,
+      SoX Noise is a GTK application that uses Sound eXchange (SoX) to generate white, pink,
       or brown noise in real time, as well as provide some filter controls
       and basic effects.
     </p>
@@ -23,7 +23,7 @@
     </p>
   </description>
 
-  <launchable type="desktop-id">io.github.edward_jazzhands.SoxNoise.desktop</launchable>
+  <launchable type="desktop-id">sox-noise.desktop</launchable>
 
   <screenshots>
     <screenshot type="default">

@@ -1,1 +1,2 @@
-io.github.edward_jazzhands.SoxNoise.desktop usr/share/applications/
+sox-noise.desktop usr/share/applications/
+sox-noise.metainfo.xml usr/share/metainfo/

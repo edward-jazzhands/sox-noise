@@ -35,7 +35,7 @@ create-version:
 
 desktop-file:
 	mkdir -p ~/.local/share/applications
-	cp io.github.edward_jazzhands.SoxNoise.desktop ~/.local/share/applications/io.github.edward_jazzhands.SoxNoise.desktop
+	cp sox-noise.desktop ~/.local/share/applications/sox-noise.desktop
 
 PACKAGES := sox python3-gi gir1.2-gtk-3.0 libgtk-3-0
 

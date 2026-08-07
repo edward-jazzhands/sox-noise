@@ -1,5 +1,11 @@
 # Changelog for SoX Noise
 
+## [1.0.2] 2026-08-07
+
+- Renamed app identifier to just be 'sox-noise'
+- Moved metainfo.xml file to root of repo
+- Fixed metainfo.xml file to be included in build
+
 ## [1.0.1] 2026-08-06
 
 **Package:**

@@ -1,3 +1,11 @@
+sox-noise (1.0.2) unstable; urgency=medium
+
+  * Renamed app identifier to just be 'sox-noise'
+  * Moved metainfo.xml file to root of repo
+  * Fixed metainfo.xml file to be included in build
+
+ -- Brent Lidstone <ed.jazzhands@gmail.com>  Fri, 07 Aug 2026 07:59:21 -0700
+
 sox-noise (1.0.1) unstable; urgency=medium
 
   * Added man page
