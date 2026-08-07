@@ -27,8 +27,8 @@
 
   <screenshots>
     <screenshot type="default">
-      <image>https://raw.githubusercontent.com/edward-jazzhands/sox-noise/refs/heads/main/screenshot.png</image>
-      <caption>Main window with noise selector and filter controls</caption>
+      <image type="source">https://raw.githubusercontent.com/edward-jazzhands/sox-noise/refs/heads/main/screenshot.png</image>
+      <caption>Main application window</caption>
     </screenshot>
   </screenshots>
 

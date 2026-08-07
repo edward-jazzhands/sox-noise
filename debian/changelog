@@ -1,3 +1,9 @@
+sox-noise (1.0.3) unstable; urgency=medium
+
+  * Fixed screenshot not showing in meta info
+
+ -- Brent Lidstone <ed.jazzhands@gmail.com>  Fri, 07 Aug 2026 08:16:06 -0700
+
 sox-noise (1.0.2) unstable; urgency=medium
 
   * Renamed app identifier to just be 'sox-noise'

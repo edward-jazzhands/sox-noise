@@ -1,5 +1,9 @@
 # Changelog for SoX Noise
 
+## [1.0.3] 2026-08-07
+
+- Fixed screenshot not showing in meta info
+
 ## [1.0.2] 2026-08-07
 
 - Renamed app identifier to just be 'sox-noise'
