@@ -6,7 +6,7 @@
 
 ## Note from Ed
 
-This repo is a fork of the original SoX-Noise application by Jon Knapp. This fork is maintained by me (Edward Jazzhands) to make the software installable on current Linux distributions and Python versions.
+This repo is a fork of the original SoX-Noise application by Jon Knapp. This fork is maintained by me (Brent Lidstone, a.k.a Edward Jazzhands) to make the software installable on current Linux distributions and Python versions.
 
 The original application code is unchanged. Issues specific to the original application should be reported [upstream](https://github.com/Thann/sox-noise) when possible. 
 

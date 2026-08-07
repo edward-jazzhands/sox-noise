@@ -1,55 +1,51 @@
 #!/usr/bin/env bash
+set -euo pipefail
+# -e: exit immediately if any command fails
+# -u: treat unset variables as errors instead of creating empty strings
+# '-o pipefail': pipelines fail if any command in it fails
 
 # HOW THIS WORKFLOW WORKS
-# This workflow automates building a Debian package and creating a GitHub Release.
 
-# --- Manual Steps ---
-# 1. Edit `pyproject.toml` to set the new version (e.g., `version = "1.2.3"` or
-#    `version = "1.2.4-rc1"` for pre-releases).
-# 2. Commit the change and merge it to the `main` branch (From the feature branch or  
-#    however you work).
-# 3. On your local machine, fetch and pull the latest changes from `main` to ensure
-#    you're up to date.
-# 4. Run the release script, then push the tags to GitHub (conditonal on success):
+# 1. Edit `VERSION` (in project root) to set the new version. (Use "1.2.4-rc1"`for pre-releases)
+# 2. Commit the change and push/merge it to main.
+# 3. On your local machine, fetch and pull the latest changes from `main`.
+# 4. Run the release command (make/just release)
 
-#    `bash .github/scripts/release.sh && git push --tags`
+# This script will:
+# - Check that devscripts is installed.
+# - Check that you're on the `main` branch.
+# - Check that there's no uncommitted changes.
+# - Check that it's up to date with `origin/main`.
+# - Check that the VERSION file matches the CHANGELOG.md file
 
-# This command will:
-# - Check that you're on the `main` branch and that it's up to date with `origin/main`.
-# - Create a new tag based on the version in `pyproject.toml`.
-# - Pushes the new tag to github which, triggers this workflow file.
+if ! command -v dch &> /dev/null; then
+	echo "Missing devscripts package. Must install first..."
+    sudo apt install devscripts
+fi
 
-
-# The -e flag makes bash exit immediately if any command fails
-# The -u flag treats unset variables as errors instead of creating empty strings
-# The -o pipefail flag makes a pipeline (like cmd1 | cmd2) fail if any command in it fails
-set -euo pipefail
-
-# Step 1 of the 'release' workflow. (`make release`).
-# We must be on main and it must be up to date with origin/main for the process
-# to continue.
-# This is because it creates a new tag based on the version in pyproject.toml,
-# and then pushes the tag to GitHub. Tags are metadata that go over the top of
-# branches and commits, so they're not blocked by branch protection rules.
-
-# If we're not on main or it's not up to date with origin/main, problems could
-# occur, such as:
-# - The 'version' in pyproject.toml doesn't match what's in the online main
-#   branch on Github
-# - You push a tag that points to a commit that Github hasn't seen yet,
-# it's a pain in the ass to fix if you do any of these things by mistake.
+echo "Current working dir: $(pwd)"
 
 # Check if on main branch
 CURRENT_BRANCH=$(git branch --show-current)
 if [ "$CURRENT_BRANCH" != "main" ]; then
-	echo "Error: You are not on the main branch. Please switch to main."
+	echo "Error: You are not on the main branch. Switch to main."
 	exit 1
 fi
 
-# Check for uncommitted changes
-if [ -n "$(git status --porcelain)" ]; then
-	echo "Error: There are uncommitted changes. Please commit or stash them."
-	exit 1
+# Check for unstaged changes
+if ! git diff --quiet; then
+	echo "Error: There are unstaged changes. Must stage all changes first."
+	read -r -p "Do you want to stage all changes? [y/N] " response
+
+	if [[ "$response" =~ ^[Yy]$ ]]; then
+		echo "Staging all..."
+		git add -A
+	else
+		echo "Aborting."
+		exit 1
+	fi
+else
+	echo "All changes are staged."
 fi
 
 # Fetch latest changes from remote
@@ -57,26 +53,49 @@ git fetch
 
 # Check if local main is up to date with origin/main
 if ! git rev-parse origin/main > /dev/null 2>&1; then
-	echo "Error: Remote branch origin/main does not exist. Please set up a remote tracking branch."
+	echo "Error: Remote branch origin/main does not exist. Set up a remote tracking branch."
 	exit 1
 fi
 LOCAL_HASH=$(git rev-parse main)
 REMOTE_HASH=$(git rev-parse origin/main)
 if [ "$LOCAL_HASH" != "$REMOTE_HASH" ]; then
-	echo "Error: Your local main branch is not up to date with origin/main. Please pull the latest changes."
+	echo "Error: Your local main branch is not up to date with origin/main. Pull the latest changes first."
 	exit 1
 fi
 
+CHANGELOG_FILE="CHANGELOG.md"
+if [ ! -f "CHANGELOG.md" ]; then
+    echo "Error: CHANGELOG.md does not exist." >&2
+    exit 1
+fi
 
-# grep '^version' finds lines starting with 'version' (^ anchors to line start,
-# preventing false matches on keys like 'requires-python').
-# head -1 takes only the first line (just to be safe).
-# sed then strips everything except the version string itself, using a capture
-# group \(.*\) to grab what's between the quotes, and \1 to output just that.
-version=$(grep '^version' pyproject.toml | head -1 | sed 's/version = "\(.*\)"/\1/')
-tag="v${version}"
+VERSION=$(cat VERSION)
+echo "Found version ${VERSION}"
 
-echo "Found version ${version}. Creating tag: ${tag}"
+CHANGELOG_VERSION=$(grep -m 1 '^## ' CHANGELOG.md | sed -E 's/^## *\[?v?([0-9]+\.[0-9]+\.[0-9]+[a-zA-Z0-9.-]*)\]?.*/\1/')
+
+if [ "$VERSION" != "$CHANGELOG_VERSION" ]; then
+	echo "Error: VERSION file ($VERSION) does not match latest CHANGELOG.md entry ($CHANGELOG_VERSION)"
+	exit 1
+fi
+
+echo "VERSION and CHANGELOG.md are in sync: $VERSION"
+
+LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+if [ -z "$LAST_TAG" ]; then
+	echo "No previous tag found, treating as changed"
+else
+	LAST_TAG_VERSION=$(git show "$LAST_TAG:VERSION" 2>/dev/null || echo "")
+	if [ "$VERSION" != "$LAST_TAG_VERSION" ]; then
+		echo "Version $VERSION is different from last tag ($LAST_TAG_VERSION)"
+	else
+		echo "ERROR: VERSION ($VERSION) is the same as most recent tag. Aborting"
+		exit 1
+	fi
+fi
+
+LATEST_NOTES=$(awk '/^## / { if (++count == 2) exit; next } count == 1 { print }' "CHANGELOG.md")
 
 read -r -p "Are you sure you want to continue? [y/N] " response
 
@@ -87,9 +106,48 @@ else
     exit 1
 fi
 
-if git tag "$tag"; then
-    echo "Successfully created tag '${tag}'."
+
+CHANGELOG_FILE="./debian/changelog"
+
+# This is from the devscripts package
+# "" as the message : create the entry with no bullet text yet;
+#                      we'll append each bullet in the loop below
+dch -c "$CHANGELOG_FILE" -v "$VERSION" -D unstable ""
+
+# -c FILE      : use FILE instead of the default debian/changelog
+# -v VERSION   : create a new entry for this version (same as --newversion)
+# -D DIST      : set the distribution field (e.g. unstable)
+
+# Read CHANGELOG.md one line at a time.
+# IFS= and -r stop `read` from trimming whitespace or treating
+# backslashes specially, so lines come through intact.
+while IFS= read -r line; do
+    [[ -z "$line" ]] && continue                  # skip blank lines
+
+    # skip markdown header lines with **
+    if [[ "$line" =~ ^\*\*.*\*\*:?$ ]]; then
+        continue
+    fi
+    line="${line#- }"   # strip leading "- " markdown bullet marker
+
+    # -a : append this text as a new bullet ("*") to the entry
+    #      created above, instead of starting a new version entry
+    dch -c "$CHANGELOG_FILE" -a "$line"
+
+done <<< "$LATEST_NOTES"
+
+# -r : close out ("release") the changelog entry, stamping the
+#      current date/time and finalizing it
+dch -c "$CHANGELOG_FILE" -r ""
+
+read -r -p "Debian changelog updated. Ready to commit? [y/N] " response
+
+if [[ "$response" =~ ^[Yy]$ ]]; then
+	echo "Adding updated changelog..."
+	git add -A
+    echo "Committing..."
+	git commit
 else
-    echo "Error: Could not create tag '${tag}'."
+    echo "Aborting."
     exit 1
 fi

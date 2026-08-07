@@ -1,10 +1,10 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: sox-noise
-Upstream-Contact: Edward Jazzhands <ed.jazzhands@gmail.com>
+Upstream-Contact: Brent Lidstone <ed.jazzhands@gmail.com>
 Source: https://github.com/edward-jazzhands/sox-noise
 
 Files: *
-Copyright: 2026 Edward Jazzhands <ed.jazzhands@gmail.com>
+Copyright: 2026 Brent Lidstone <ed.jazzhands@gmail.com>
 License: Unlicense
 
 Files:

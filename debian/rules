@@ -1,3 +1,7 @@
 #!/usr/bin/make -f
 %:
 	dh $@ --with python3 --buildsystem=pybuild
+
+override_dh_auto_build:
+	echo "0.0.3(app) - $$(cat VERSION)(package)" > src/sox_noise/.version
+	dh_auto_build

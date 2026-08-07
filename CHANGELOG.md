@@ -2,8 +2,19 @@
 
 ## [1.0.1] 2026-08-06
 
+**Package:**
+
 - Added man page
 - Improved package meta data to get ready for submission to Debian
+- Changed the .version file in src/sox_noise to be generated automatically in the build/install process.
+
+**Development**:
+
+- Changed 'pyproject.toml' to use dynamic versioning
+- Created 'VERSION' file
+- Changed the release github action workflow to create the tag after successful build, instead of being triggered by the tag creation.
+- debian/changelog entry is now copied directly from CHANGELOG.md
+
 
 ## [1.0.0] 2026-07-24
 

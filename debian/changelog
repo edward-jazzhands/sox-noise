@@ -1,3 +1,17 @@
+sox-noise (1.0.1) unstable; urgency=medium
+
+  * Added man page
+  * Improved package meta data to get ready for submission to Debian
+  * Changed the .version file in src/sox_noise to be generated
+    automatically in the build/install process.
+  * Changed 'pyproject.toml' to use dynamic versioning
+  * Created 'VERSION' file
+  * Changed the release github action workflow to create the tag after
+    successful build, instead of being triggered by the tag creation.
+  * debian/changelog entry is now copied directly from CHANGELOG.md
+
+ -- Brent Lidstone <ed.jazzhands@gmail.com>  Fri, 07 Aug 2026 07:21:30 -0700
+
 sox-noise (1.0.0) unstable; urgency=medium
 
   * Take over maintenance of sox-noise, originally authored by Jonathan Knapp.
@@ -7,4 +21,4 @@ sox-noise (1.0.0) unstable; urgency=medium
   * Fix broken version detection; freeze application version string.
   * See CHANGELOG.md for full details.
 
- -- Edward Jazzhands <ed.jazzhands@gmail.com>  Fri, 24 Jul 2026 00:00:00 +0000
+ -- Brent Lidstone <ed.jazzhands@gmail.com>  Fri, 24 Jul 2026 00:00:00 +0000

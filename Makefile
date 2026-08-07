@@ -2,7 +2,9 @@
 SHELL := /bin/bash
 .SILENT:
 .PHONY: help install compile desktop-file test nox build-deb sync-tags release container lintian appstream
+
 SUDO := $(shell [[ "$$USER" == "root" ]] && echo "" || echo "sudo")
+VERSION := $(shell cat VERSION)
 
 WITH ?= default
 ENV ?= default
@@ -28,9 +30,16 @@ help:
 	$(SUDO) apt update
 	touch .apt-updated
 
+create-version:
+	echo "0.0.3(app) - $(VERSION)(package)" > src/.version
+
+desktop-file:
+	mkdir -p ~/.local/share/applications
+	cp io.github.edward_jazzhands.SoxNoise.desktop ~/.local/share/applications/io.github.edward_jazzhands.SoxNoise.desktop
+
 PACKAGES := sox python3-gi gir1.2-gtk-3.0 libgtk-3-0
 
-install: .apt-updated
+install: .apt-updated create-version
 	$(SUDO) apt install $(PACKAGES)
 
 	@echo ""
@@ -71,7 +80,7 @@ install: .apt-updated
 
 COMPILING_PKGS := sox python3-dev libgirepository-2.0-dev libgtk-3-dev gcc libcairo2-dev
 
-compile: .apt-updated
+compile: .apt-updated create-version
 	$(SUDO) apt install $(COMPILING_PKGS)
 
 	@echo ""
@@ -108,10 +117,6 @@ compile: .apt-updated
 	fi
 
 	$(MAKE) desktop-file
-
-desktop-file:
-	mkdir -p ~/.local/share/applications
-	cp io.github.edward_jazzhands.SoxNoise.desktop ~/.local/share/applications/io.github.edward_jazzhands.SoxNoise.desktop
 
 # Sets up the environment and runs pytest
 # the status arg 
@@ -155,7 +160,7 @@ sync-tags:
 # Only release with this command, it contains a bunch of safety checks.
 # see release.sh for more information
 release: sync-tags
-	bash .github/scripts/release.sh && git push --tags
+	bash .github/scripts/release.sh
 
 container:
 	if ! command -v systemd-nspawn &>/dev/null; then

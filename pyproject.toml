@@ -1,6 +1,6 @@
 [project]
 name = "sox-noise"
-version = "1.0.1"
+dynamic = ["version"]
 description = "Noise generator GUI powered by Sound eXchange"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -8,7 +8,7 @@ authors = [
     { name = "Jonathan Knapp", email = "jaknapp8@gmail.com" },
 ]
 maintainers = [
-    { name = "Edward Jazzhands", email = "ed.jazzhands@gmail.com" },
+    { name = "Brent Lidstone", email = "ed.jazzhands@gmail.com" },
 ]
 license = { text = "Unlicense" }
 keywords = ["sox", "noise", "generator", "white noise"]
@@ -32,6 +32,9 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.dynamic]
+version = {file = "VERSION"}
 
 [tool.setuptools.package-data]
 "*" = ["main.ui", ".version"]
